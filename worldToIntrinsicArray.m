@@ -1,4 +1,21 @@
 function [r,c] = worldToIntrinsicArray(x,y,XWorldLimits,YWorldLimits, RasterSize)
+% find intrinsic coodiates (row, column) of a real world location provided
+% world limits and size of raser
+
+%% Syntax 
+% 
+%  [r,c] = worldToIntrinsicArray(x,y,XWorldLimits,YWorldLimits, RasterSize)
+%
+%% User Input
+%
+%   x = real world location in x
+%	y = real world location in y
+%	XWorldLimits = real world limits x of raster
+%	YWorldLimits = real world limits y of raster
+%   RasterSize = [num_rows, num_cols]
+%
+%% Author Info
+% This function was written by Alex S. Gardner, JPL-Caltech, Oct 2018. 
 
 m = length(x);
 n = size(XWorldLimits,1);

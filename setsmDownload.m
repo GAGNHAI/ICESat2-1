@@ -1,24 +1,19 @@
-function setsmDownload(product, version, localFolder)
-% Created by: 
-% Alex Gardner, NASA-JPL, California Institute of Technology
-% email: alex.s.gardner@jpl.nasa.gov
-
-% User Inputs
-% Example 1:
-% product = 'ArcticDEM_tiles';
-% version = 'v2.0'
-% localFolder = '/Volumes/MasterBrain/data';
+function setsmDownload(dataset, product, dataver, resolution, local_setsm_dir)
+% Download full ArcticDEM or REMA dataset
+%
+%% Syntax 
 % 
-% Example 2
-% product = 'REMA_tiles';
-% version = 'v1.0'
-% localFolder = '/Volumes/MasterBrain/data';
+%   setsmDownload((dataset, product, dataver, resolution, local_setsm_dir)
 %
-
-%% ------------------------------------------------------------------------
-% NOTES 
+%% User Input
+%   dataset = 'REMA'; % REMA or ArcticDEM
+%   product = 'mosaic'; % mosaic or geocell
+%   dataver = 1; % REMA[1], ArcticDEM[3]
+%   resolution = 8; % mosaic(REMA[8, 100, 200, 1000], ArcticDEM[2, 10, 32, 100, 500, 1000])
 %
-% !!! for REMA: 43 TB for geocells and 1 TB for mosaics !!!!
+%% Warning 
+%
+% REMA: 43 TB for geocells and 1 TB for mosaics 
 %
 % wget must be added as an alias to your .bash_rc file after adding wget to
 % homebrew
@@ -28,26 +23,21 @@ function setsmDownload(product, version, localFolder)
 % second: add this to .bash_rc
 %       "function _wget() { curl "${1}" -o $(basename "${1}") ; };
 %       alias wget='_wget'"
-%% ------------------------------------------------------------------------
-
-switch [product version]
-    case ['REMA_tiles' 'v1.0']
-        % copy all data from requested folder
-        % https://docs.google.com/document/d/1XlSk1wK_KHaYSdKVp3Fq_tJA8gh0v2YqNi8OANj7_IQ/view
-        % elevations are w.r.t the WGS84 ellipsoid
-        folder2mirror = 'REMA/mosaic/v1.0/8m';
-        indexFiles = 'REMA/indexes';
-        
-    case ['ArcticDEM_tiles' 'v2.0']
-        folder2mirror = 'ArcticDEM/mosaic/v2.0';
-        indexFiles = 'ArcticDEM/indexes';
-    otherwise
-        error('unrecognized product and/or version')
+%
+%% Author Info
+% This function was written by Alex S. Gardner, JPL-Caltech, Oct 2018. 
+%
+ver = sprintf('v%.1f', dataver);
+if resolution < 999
+    res = sprintf('%.0fm', resolution);
+else
+    res = sprintf('%.0fkm', resolution/1E3);
 end
 
-
-unixCall = ['wget -r -N -nH -np -R index.html* --cut-dirs=3 ' fullfile('http://data.pgc.umn.edu/elev/dem/setsm/', folder2mirror, '/') ' -P '  fullfile(localFolder)];
+index_folder = fullfile(dataset, 'indexes');
+unixCall = ['wget -r -N -nH -np -R index.html* --cut-dirs=3 ' fullfile('http://data.pgc.umn.edu/elev/dem/setsm/', index_folder, '/') ' -P '  fullfile(local_setsm_dir, '/')];
 unix(unixCall, '-echo')
 
-unixCall = ['wget -r -N -nH -np -R index.html* --cut-dirs=3 ' fullfile('http://data.pgc.umn.edu/elev/dem/setsm/', indexFiles, '/') ' -P '  fullfile(localFolder)];
+folder2mirror = fullfile(dataset, product, ver, res);
+unixCall = ['wget -r -N -nH -np -R index.html* --cut-dirs=3 ' fullfile('http://data.pgc.umn.edu/elev/dem/setsm/', folder2mirror, '/') ' -P '  fullfile(local_setsm_dir, '/')];
 unix(unixCall, '-echo')
